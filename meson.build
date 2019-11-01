@@ -32,6 +32,10 @@ if host_machine.system() != 'windows'
     sources += 'src/connection_unix.cpp'
 endif
 
+if meson.get_compiler('cpp') != 'msvc'
+    args += '-Wno-unknown-pragmas'
+endif
+
 if host_machine.system() == 'windows'
     args += '/DDISCORD_WINDOWS'
     sources += [
