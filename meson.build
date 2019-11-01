@@ -28,6 +28,10 @@ if meson.get_compiler('cpp').get_id() == 'msvc'
     args += '/EHsc-'
 endif
 
+if host_machine.system() != 'windows'
+    sources += 'src/connection_unix.cpp'
+endif
+
 if host_machine.system() == 'windows'
     args += '/DDISCORD_WINDOWS'
     sources += [
