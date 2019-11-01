@@ -42,7 +42,7 @@ elif host_machine.system() == 'darwin'
     add_languages('objc')
     args += '-DDISCORD_OSX'
     sources += 'src/discord_register_osx.m'
-    deps += dependency('appleframework', modules : 'AppKit')
+    deps += dependency('appleframeworks', modules : 'AppKit')
 else
     args += '-DDISCORD_LINUX'
     sources += 'src/discord_register_linux.cpp'
