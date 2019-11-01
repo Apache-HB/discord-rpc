@@ -2,7 +2,7 @@ project('discord-rpc', ['cpp'],
     default_options : [
         'cpp_std=c++14',
         'cpp_eh=none'
-    ]
+    ],
     version : '3.5',
     license : 'Discord Inc'
 )
@@ -22,27 +22,14 @@ args = []
 links = []
 deps = []
 
-incs = [
-    include_directories('')
-]
+incdir = include_directories('include')
+
+if meson.get_compiler('cpp').get_id() == 'msvc'
+    args += '/EHsc-'
+endif
 
 if host_machine.system() == 'windows'
-    args += [
-        '/DDISCORD_WINDOWS',
-        '/Wall',
-        '/wd4100',
-        '/wd4514',
-        '/wd4625',
-        '/wd5026',
-        '/wd4626',
-        '/wd4668',
-        '/wd4710',
-        '/wd4710',
-        '/wd4711',
-        '/wd4820',
-        '/wd4946',
-        '/wd5027'
-    ]
+    args += '/DDISCORD_WINDOWS'
     sources += [
         'src/connection_win.cpp',
         'src/discord_register_win.cpp'
@@ -52,9 +39,21 @@ if host_machine.system() == 'windows'
         'advapi.lib'
     ]
 elif host_machine.system() == 'darwin'
+    add_languages('objc')
     args += '-DDISCORD_OSX'
     sources += 'src/discord_register_osx.m'
     deps += dependency('appleframework', modules : 'AppKit')
 else
     args += '-DDISCORD_LINUX'
+    sources += 'src/discord_register_linux.cpp'
 endif
+
+json = subproject('rapidjson')
+
+jsonincdir = json.get_variable('rapidjson_inc')
+
+discord_lib = static_library('discord-rpc', sources, include_directories : [incdir, jsonincdir], cpp_args : args, install : true)
+discord_dep = declare_dependency(link_with : discord_lib, include_directories : incdir)
+
+pkg = import('pkgconfig')
+pkg.generate(discord_lib, name : 'discord-rpc', description : 'Discord rich presence')
